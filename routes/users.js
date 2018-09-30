@@ -20,7 +20,11 @@ const user_signin = async (req, res, client) => {
       `SELECT id, last_name, first_name, address, phone, email FROM users WHERE password='${password}' AND first_name='${first_name}'` 
     )
     if (result.rows.length === 0 ) res.sendStatus(404)
-    else res.send(result.rows)
+    else {
+      const user_id = result.rows[0].id
+      const countScheds = await client.query(`select count(*) from meetings where user_id='${user_id}';`)
+      res.send({...result.rows[0], countScheds: countScheds.rows[0].count})
+    }
   } catch(err){
     console.log(err)
   }
@@ -38,8 +42,22 @@ const user_signup = async (req, res, client) => {
     console.log(err)
   }
 }
+
+const schedulability = async (req, res, client) => {
+  try {
+    const {user_id} = req.params
+    const result = await client.query(
+      `SELECT * from meetings where user_id='${user_id}' AND allow=true`
+    )
+    res.send(result.rows)
+  } catch(err) {
+    console.log(err)
+  }
+}
+
 module.exports = {
   user_signin,
   user_signup,
   get_users,
+  schedulability,
 }

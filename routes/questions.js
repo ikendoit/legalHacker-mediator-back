@@ -24,6 +24,8 @@ const questions = async (req, res, client) => {
         `INSERT INTO meetings(user_id, question_id) VALUES('${user_id}', '${question_id}') RETURNING id;`
       )
     }
+    // now, send email notification to the mediator to read through and check.
+    // mediator will go to "check all questionaire" page and evaluate
     res.sendStatus(201)
   } catch(err) {
     console.log(err)
@@ -34,6 +36,8 @@ const set_allow_case = async ( req, res, client) => {
   try {
     const {question_id, allow} = req.body
     const result = await client.query(`UPDATE meetings set allow='${allow}' where question_id='${question_id}'`)
+    // if allow = true, now we shall email to the user having the questionaire.
+    // the user will go to "check my questionaire" page and set date of meeting
     res.sendStatus(201)
   } catch(err) {
     console.log(err)
