@@ -28,45 +28,35 @@ const {
   get_schedules,
   update_schedules,
 } = require('./routes/schedules')
+const {
+  feed_back,
+  get_feed_backs,
+} = require('./routes/services')
 
 
 client.connect()
 
-client.query('select * from users', (err, res) => {
-});
-
-//set handler function
-
-
-const feedBack = (req, res) => {
-  try {
-    const {user, feedBack} = req.body
-    const user_id = user.id
-  } catch(err) {
-    console.log(err)
-  }
-}
-
 //set route
 const routeConfig =  [
-  ['/questions', async (req,res) => await questions(req, res, client), 'POST'],
-  ['/questions_list', async (req,res) => await get_list_questions(req, res, client), 'GET'],
-  ['/question_single/:question_id', async (req,res) => await get_question(req, res, client), 'GET'],
-  ['/allow_case', async (req,res) => await set_allow_case(req, res, client), 'POST'],
-  ['/schedule', async (req, res) => await schedule(req, res, client), 'POST'],
-  ['/schedule/:schedule_id', async (req, res) => await update_schedules(req, res, client), 'PUT'],
-  ['/schedule/:user_id', async (req, res) => await get_schedules(req, res, client), 'GET'],
-  ['/users', async (req,res) => await get_users(req,res,client), 'GET'],
-  ['/signup', async (req,res) => await user_signup(req,res,client), 'POST'],
-  ['/login', async (req,res) => await user_signin(req,res,client), 'POST'],
-  ['/schedulability/:user_id', async (req,res) => await schedulability(req,res,client), 'GET'],
-  ['/feed_back', feedBack, 'POST'],
+  ['/questions',questions, 'POST'],
+  ['/questions_list',get_list_questions, 'GET'],
+  ['/question_single/:question_id',get_question, 'GET'],
+  ['/allow_case',set_allow_case, 'POST'],
+  ['/schedule',schedule, 'POST'],
+  ['/schedule/:schedule_id',update_schedules, 'PUT'],
+  ['/schedule/:user_id',get_schedules, 'GET'],
+  ['/users',get_users, 'GET'],
+  ['/signup',user_signup, 'POST'],
+  ['/login',user_signin, 'POST'],
+  ['/schedulability/:user_id',schedulability, 'GET'],
+  ['/feed_back', feed_back, 'POST'],
+  ['/get_feed_backs', get_feed_backs, 'GET'],
 ]
 
 app.get('/', (req, res) => res.send('Hello World!'))
 
 for (let route of routeConfig) {
-  app[route[2].toLowerCase()](route[0], route[1])
+  app[route[2].toLowerCase()](route[0], async (req, res) => await route[1](req, res, client))
 }
 //done set route
 
